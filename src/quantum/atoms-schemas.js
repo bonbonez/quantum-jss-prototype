@@ -25,7 +25,7 @@ import {
   WHITE_COLOR,
   YELLOW_COOR
 } from './variables';
-import {getAtomSchemaByClassName, lookupAtomPropertyName} from '../stylesUtils';
+import {lookupAtomPropertyValue} from '../stylesUtils';
 
 function processValueOrReturnNull(callback) {
   return this ? callback(this) : null;
@@ -244,8 +244,8 @@ export const ATOMS_SCHEMAS = [
   createAtomSchema('textDecorationStyle', 'tds', TEXT_DECORATION_STYLES, [AtomGroupName.TEXT]),
   createAtomSchema('writingDirection', 'wd', WRITING_DIRECTION, [AtomGroupName.TEXT], {heritable: true}),
   createAtomSchema('lineHeight', 'lh', [
-    [classNames => classNames::lookupAtomPropertyName('fontSize')::processValueOrReturnNull(value => value * 1.5), 't'],
-    [classNames => classNames::lookupAtomPropertyName('fontSize')::processValueOrReturnNull(value => value * 1.3), 'h']
+    [classNames => classNames::lookupAtomPropertyValue('fontSize')::processValueOrReturnNull(value => value * 1.5), 't'],
+    [classNames => classNames::lookupAtomPropertyValue('fontSize')::processValueOrReturnNull(value => value * 1.3), 'h']
   ]),
 
   // View

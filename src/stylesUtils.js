@@ -18,8 +18,9 @@ export function parseClassNames(...args) {
   return quantumToJss(args::filter(identity));
 }
 
-export function lookupAtomPropertyName(propertyName) {
-  return this::map(getAtomSchemaByClassName)::find({propertyName});
+export function lookupAtomPropertyValue(propertyName) {
+  const atom = this::map(getAtomSchemaByClassName)::find({propertyName});
+  return atom ? atom.propertyValue : null;
 }
 
 function classNameToArray() {
@@ -54,6 +55,9 @@ function parseStylesString(
   return classNames::classNameToArray()::map(className => {
     const atomValue = getAtomValueByClassName(className);
     const {propertyName} = getAtomSchemaByClassName(className);
+    if (atomValue::isFunction()) {
+      console.info(atomValue(classNames::classNameToArray()));
+    }
     return atomValue::isFunction() ? {[propertyName]: atomValue(classNames::classNameToArray())} : styles[className];
   })::filter(identity);
 }
@@ -69,7 +73,7 @@ function createAppStyles(atomsSchemas) {
 function createClassNameAtomDictionary(atomsSchemas) {
   const classNameAtomDictionary = {};
   iterateAtomSchemas(atomsSchemas, (atomSchema, {value, alias}) => {
-    classNameAtomDictionary[`${atomSchema.propertyAbbreviation}${alias}`] = {atomSchema, propertyValue: value};
+    classNameAtomDictionary[`${atomSchema.propertyAbbreviation}${alias}`] = {...atomSchema, propertyValue: value};
   });
   return classNameAtomDictionary;
 }
@@ -91,11 +95,11 @@ function createAppStyleSheet(atoms) {
 }
 
 export function getAtomSchemaByClassName(className) {
-  return classNameAtomDictionary[className].atomSchema;
+  return classNameAtomDictionary[className];
 }
 
 export function getAtomValueByClassName(className) {
-  return classNameAtomDictionary[className].propertyValue;
+  return getAtomSchemaByClassName(className).propertyValue;
 }
 
 export function concatClassNames(...classNames) {

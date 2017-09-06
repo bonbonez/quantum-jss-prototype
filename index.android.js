@@ -10,7 +10,7 @@ export default class HeritableStyles extends Component {
   render() {
     return (
       <View style={parseClassNames('fx1 bgc-bb')}>
-        <Text style={parseClassNames('fz-m lh-m')} numberOfLines={2}>hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello </Text>
+        <Text style={parseClassNames('fz-m lh-t')} numberOfLines={2}>hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello </Text>
       </View>
     );
 
