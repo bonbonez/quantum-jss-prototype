@@ -1,33 +1,22 @@
+import type {AtomGroup, AtomSchema, AtomSchemaOptions, AtomValueSchema, CssProperty} from './types';
 import {AtomGroupName} from './variables';
 
 const DASH_SEPARATOR = '-';
 
-type AtomSchema = {
-  propertyName: string,
-  propertyAbbreviation: string,
-  propertyValues: [],
-  propertyGroup: [],
-  options: AtomSchemaOptions
-};
-
-type AtomSchemaOptions = {
-  heritable: boolean
-};
-
-// todo: rename to AtomSchema everywhere
 export function createAtomSchema(
-  propertyName,
-  propertyAbbreviation,
-  propertyValues,
-  propertyGroup = [AtomGroupName.VIEW],
-  {heritable = false}: AtomSchemaOptions = {}
+  property: CssProperty,
+  abbrev: string = "123",
+  values: AtomValueSchema[],
+  options: AtomSchemaOptions = {
+    groups: [],
+    heritable: false
+  }
 ): AtomSchema {
   return {
-    propertyName,
-    propertyAbbreviation,
-    propertyValues: propertyValues.map(mapAtomValue),
-    propertyGroup,
-    heritable
+    property,
+    abbrev,
+    values: values.map(mapAtomValue), // List of atom values.
+    ...options
   };
 }
 
@@ -40,11 +29,3 @@ export function mapAtomValue(value) {
     alias: `${separator}${atomAlias}`
   };
 }
-
-export function iterateAtomSchemas(atomsSchemas, callback) {
-  atomsSchemas.forEach(atomSchema => {
-    atomSchema.propertyValues.forEach(propertyValue => {
-      callback(atomSchema, propertyValue);
-    });
-  });
-};

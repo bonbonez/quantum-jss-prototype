@@ -1,6 +1,5 @@
 import range from 'lodash/range';
-import map from 'virtual-lodash/map';
-import find from 'virtual-lodash/find';
+import findLast from 'virtual-lodash/findLast';
 import {createAtomSchema} from './utils';
 import {
   AtomGroupName,
@@ -25,11 +24,6 @@ import {
   WHITE_COLOR,
   YELLOW_COOR
 } from './variables';
-import {lookupAtomPropertyValue} from '../stylesUtils';
-
-function processValueOrReturnNull(callback) {
-  return this ? callback(this) : null;
-}
 
 const FLEX_CROSS_AXIS_ALIGNS = [
   ['flex-start', 'fs'],
@@ -181,93 +175,403 @@ const WRITING_DIRECTION = [
   ['rtl', 'r']
 ];
 
-// TODO: need to make line heights relative
-// possible solution - is to compute current line height value depending on element's font size
-// const LINE_HEIGHTS = [[Math.floor(11 * 1.5), 'ts'],[Math.floor(16 * 1.5), 'tm'],[Math.floor(22 * 1.5), 'tl'],[Math.floor(30 * 1.5), 'txl'],[Math.floor(44 * 1.5), 'txxl'],[Math.floor(11 * 1.3), 'hs'],[Math.floor(16 * 1.3), 'hm'],[Math.floor(22 * 1.3), 'hl'],[Math.floor(30 * 1.3), 'hxl'],[Math.floor(44 * 1.3), 'hxxl']]
+function calculateLineHeight(atoms, element, multiplier) {
+  const fontSize = atoms::findLast({property: 'fontSize'});
+  if (!fontSize) {
+    throw new Error('lineHeight required fontSize');
+  }
+  return fontSize.getValue(atoms, element) * multiplier;
+}
 
 export const ATOMS_SCHEMAS = [
-  createAtomSchema('alignItems', 'ai', FLEX_CROSS_AXIS_ALIGNS),
-  createAtomSchema('alignSelf', 'as', FLEX_SELF_ALIGNS),
-  createAtomSchema('borderBottomWidth', 'bdbw', BORDER_WIDTHS),
-  createAtomSchema('borderLeftWidth', 'bdlw', BORDER_WIDTHS),
-  createAtomSchema('borderRightWidth', 'bdrw', BORDER_WIDTHS),
-  createAtomSchema('borderTopWidth', 'bdtw', BORDER_WIDTHS),
-  createAtomSchema('borderWidth', 'bdw', BORDER_WIDTHS),
-  createAtomSchema('bottom', 'b', POSITION_VALUES, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('flex', 'fx', FLEX_GROW_VALUES),
-  createAtomSchema('flexGrow', 'fxg', FLEX_GROW_VALUES),
-  createAtomSchema('flexShrink', 'fxs', FLEX_SHRINK_VALUES),
-  createAtomSchema('flexDirection', 'fxd', FLEX_DIRECTIONS),
-  createAtomSchema('flexWrap', 'fxw', FLEX_WRAPS),
-  createAtomSchema('height', 'h', HEIGHTS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('justifyContent', 'jc', FLEX_MAIN_AXIS_ALIGNS),
-  createAtomSchema('left', 'l', POSITION_VALUES, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('margin', 'm', MARGINS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('marginBottom', 'mb', MARGINS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('marginHorizontal', 'mx', MARGINS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('marginLeft', 'ml', MARGINS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('marginRight', 'mr', MARGINS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('marginTop', 'mt', MARGINS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('marginVertical', 'my', MARGINS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('maxHeight', 'mah', HEIGHTS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('maxWidth', 'maw', WIDTHS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('minHeight', 'mih', HEIGHTS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('minWidth', 'miw', WIDTHS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('padding', 'p', PADDINGS),
-  createAtomSchema('paddingBottom', 'pb', PADDINGS),
-  createAtomSchema('paddingHorizontal', 'px', PADDINGS),
-  createAtomSchema('paddingLeft', 'pl', PADDINGS),
-  createAtomSchema('paddingRight', 'pr', PADDINGS),
-  createAtomSchema('paddingTop', 'pt', PADDINGS),
-  createAtomSchema('paddingVertical', 'py', PADDINGS),
-  createAtomSchema('position', 'pos', POSITIONS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('right', 'r', POSITION_VALUES, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('top', 't', POSITION_VALUES, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('zIndex', 'z', Z_INDICES, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
-  createAtomSchema('width', 'w', WIDTHS, [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]),
+  createAtomSchema(
+    'alignItems', 'ai', FLEX_CROSS_AXIS_ALIGNS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'alignSelf', 'as', FLEX_SELF_ALIGNS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderBottomWidth', 'bdbw', BORDER_WIDTHS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderLeftWidth', 'bdlw', BORDER_WIDTHS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderRightWidth', 'bdrw', BORDER_WIDTHS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderTopWidth', 'bdtw', BORDER_WIDTHS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderWidth', 'bdw', BORDER_WIDTHS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'bottom', 'b', POSITION_VALUES, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'flex', 'fx', FLEX_GROW_VALUES, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'flexGrow', 'fxg', FLEX_GROW_VALUES, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'flexShrink', 'fxs', FLEX_SHRINK_VALUES, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'flexDirection', 'fxd', FLEX_DIRECTIONS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'flexWrap', 'fxw', FLEX_WRAPS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'height', 'h', HEIGHTS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'justifyContent', 'jc', FLEX_MAIN_AXIS_ALIGNS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'left', 'l', POSITION_VALUES, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'margin', 'm', MARGINS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'marginBottom', 'mb', MARGINS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'marginHorizontal', 'mx', MARGINS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'marginLeft', 'ml', MARGINS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'marginRight', 'mr', MARGINS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'marginTop', 'mt', MARGINS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'marginVertical', 'my', MARGINS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'maxHeight', 'mah', HEIGHTS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'maxWidth', 'maw', WIDTHS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'minHeight', 'mih', HEIGHTS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'minWidth', 'miw', WIDTHS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'padding', 'p', PADDINGS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'paddingBottom', 'pb', PADDINGS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'paddingHorizontal', 'px', PADDINGS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'paddingLeft', 'pl', PADDINGS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'paddingRight', 'pr', PADDINGS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'paddingTop', 'pt', PADDINGS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'paddingVertical', 'py', PADDINGS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'position', 'pos', POSITIONS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'right', 'r', POSITION_VALUES, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'top', 't', POSITION_VALUES, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'zIndex', 'z', Z_INDICES, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
+  createAtomSchema(
+    'width', 'w', WIDTHS, {
+      groups: [AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]
+    }
+  ),
 
   // Image
-  createAtomSchema('resizeMode', 'rzm', RESIZE_MODES, [AtomGroupName.IMAGE]),
-  createAtomSchema('tintColor', 'tc', COLORS, [AtomGroupName.IMAGE]),
-  createAtomSchema('overlayColor', 'oc', COLORS, [AtomGroupName.IMAGE]),
+  createAtomSchema(
+    'resizeMode', 'rzm', RESIZE_MODES, {
+      groups: [AtomGroupName.IMAGE]
+    }
+  ),
+  createAtomSchema(
+    'tintColor', 'tc', COLORS, {
+      groups: [AtomGroupName.IMAGE]
+    }
+  ),
+  createAtomSchema(
+    'overlayColor', 'oc', COLORS, {
+      groups: [AtomGroupName.IMAGE]
+    }
+  ),
 
   // Text
-  createAtomSchema('color', 'c', COLORS, [AtomGroupName.TEXT], {heritable: true}),
-  createAtomSchema('fontSize', 'fz', FONT_SIZES, [AtomGroupName.TEXT], {heritable: true}),
-  createAtomSchema('fontStyle', 'fs', FONT_STYLE, [AtomGroupName.TEXT]),
-  createAtomSchema('fontWeight', 'fw', FONT_WEIGHTS, [AtomGroupName.TEXT]),
-  createAtomSchema('textAlign', 'ta', TEXT_ALIGNS, [AtomGroupName.TEXT], {heritable: true}),
-  createAtomSchema('textDecorationLine', 'tdl', TEXT_DECORATION_LINES, [AtomGroupName.TEXT]),
-  createAtomSchema('textAlignVertical', 'tay', VERTICAL_TEXT_ALIGNS, [AtomGroupName.TEXT], {heritable: true}),
-  createAtomSchema('letterSpacing', 'ls', LETTER_SPACINGS, [AtomGroupName.TEXT]),
-  createAtomSchema('textDecorationColor', 'tdc', COLORS, [AtomGroupName.TEXT]),
-  createAtomSchema('textDecorationStyle', 'tds', TEXT_DECORATION_STYLES, [AtomGroupName.TEXT]),
-  createAtomSchema('writingDirection', 'wd', WRITING_DIRECTION, [AtomGroupName.TEXT], {heritable: true}),
-  createAtomSchema('lineHeight', 'lh', [
-    [classNames => classNames::lookupAtomPropertyValue('fontSize')::processValueOrReturnNull(value => value * 1.5), 't'],
-    [classNames => classNames::lookupAtomPropertyValue('fontSize')::processValueOrReturnNull(value => value * 1.3), 'h']
-  ]),
+  createAtomSchema(
+    'color', 'c', COLORS, {
+      groups: [AtomGroupName.TEXT],
+      heritable: true
+    }
+  ),
+  createAtomSchema(
+    'fontSize', 'fz', FONT_SIZES, {
+      groups: [AtomGroupName.TEXT],
+      heritable: true
+    }
+  ),
+  createAtomSchema(
+    'fontStyle', 'fs', FONT_STYLE, {
+      groups: [AtomGroupName.TEXT]
+    }
+  ),
+  createAtomSchema(
+    'fontWeight', 'fw', FONT_WEIGHTS, {
+      groups: [AtomGroupName.TEXT]
+    }
+  ),
+  createAtomSchema(
+    'textAlign', 'ta', TEXT_ALIGNS, {
+      groups: [AtomGroupName.TEXT],
+      heritable: true
+    }
+  ),
+  createAtomSchema(
+    'textDecorationLine', 'tdl', TEXT_DECORATION_LINES, {
+      groups: [AtomGroupName.TEXT]
+    }
+  ),
+  createAtomSchema(
+    'textAlignVertical', 'tay', VERTICAL_TEXT_ALIGNS, {
+      groups: [AtomGroupName.TEXT],
+      heritable: true
+    }
+  ),
+  createAtomSchema(
+    'letterSpacing', 'ls', LETTER_SPACINGS, {
+      groups: [AtomGroupName.TEXT]
+    }
+  ),
+  createAtomSchema(
+    'textDecorationColor', 'tdc', COLORS, {
+      groups: [AtomGroupName.TEXT]
+    }
+  ),
+  createAtomSchema(
+    'textDecorationStyle', 'tds', TEXT_DECORATION_STYLES, {
+      groups: [AtomGroupName.TEXT]
+    }
+  ),
+  createAtomSchema(
+    'writingDirection', 'wd', WRITING_DIRECTION, {
+      groups: [AtomGroupName.TEXT],
+      heritable: true
+    }
+  ),
+  createAtomSchema(
+    'lineHeight', 'lh', [
+      [(atoms, element) => calculateLineHeight(atoms, element, 1.5), 't'],
+      [(atoms, element) => calculateLineHeight(atoms, element, 1.3), 'h']
+    ], {
+      groups: [AtomGroupName.TEXT],
+      heritable: true
+    }
+  ),
 
   // View
-  createAtomSchema('backfaceVisibility', 'bfc', BACKFACE_VISIBILITIES),
-  createAtomSchema('backgroundColor', 'bgc', COLORS),
-  createAtomSchema('borderBottomColor', 'bdbc', COLORS),
-  createAtomSchema('borderBottomLeftRadius', 'bdblr', RADII),
-  createAtomSchema('borderBottomRightRadius', 'bdbrr', RADII),
-  createAtomSchema('borderBottomWidth', 'bdbw', BORDER_WIDTHS),
-  createAtomSchema('borderColor', 'bdc', COLORS),
-  createAtomSchema('borderLeftColor', 'bdlc', COLORS),
-  createAtomSchema('borderLeftWidth', 'bdlw', BORDER_WIDTHS),
-  createAtomSchema('borderRadius', 'bdr', RADII),
-  createAtomSchema('borderRightColor', 'bdrc', COLORS),
-  createAtomSchema('borderRightWidth', 'bdrw', BORDER_WIDTHS),
-  createAtomSchema('borderStyle', 'bds', BORDER_STYLES),
-  createAtomSchema('borderTopColor', 'bdtc', COLORS),
-  createAtomSchema('borderTopLeftRadius', 'bdtlr', RADII),
-  createAtomSchema('borderTopRightRadius', 'bdtrr', RADII),
-  createAtomSchema('borderTopWidth', 'bdtw', BORDER_WIDTHS),
-  createAtomSchema('borderWidth', 'bdw', BORDER_WIDTHS),
-  createAtomSchema('opacity', 'op', OPACITIES),
-  createAtomSchema('overflow', 'ov', OVERFLOWS),
-  createAtomSchema('elevation', 'el', ELEVATIONS),
+  createAtomSchema(
+    'backfaceVisibility', 'bfc', BACKFACE_VISIBILITIES, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'backgroundColor', 'bgc', COLORS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderBottomColor', 'bdbc', COLORS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderBottomLeftRadius', 'bdblr', RADII, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderBottomRightRadius', 'bdbrr', RADII, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderBottomWidth', 'bdbw', BORDER_WIDTHS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderColor', 'bdc', COLORS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderLeftColor', 'bdlc', COLORS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderLeftWidth', 'bdlw', BORDER_WIDTHS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderRadius', 'bdr', RADII, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderRightColor', 'bdrc', COLORS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderRightWidth', 'bdrw', BORDER_WIDTHS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderStyle', 'bds', BORDER_STYLES, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderTopColor', 'bdtc', COLORS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderTopLeftRadius', 'bdtlr', RADII, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderTopRightRadius', 'bdtrr', RADII, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderTopWidth', 'bdtw', BORDER_WIDTHS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'borderWidth', 'bdw', BORDER_WIDTHS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'opacity', 'op', OPACITIES, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'overflow', 'ov', OVERFLOWS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
+  createAtomSchema(
+    'elevation', 'el', ELEVATIONS, {
+      groups: [AtomGroupName.VIEW]
+    }
+  ),
 ];

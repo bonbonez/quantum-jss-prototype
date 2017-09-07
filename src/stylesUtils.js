@@ -1,148 +1,89 @@
 //@flow
-import {StyleSheet} from 'react-native';
-import {filter, includes, isArray, isString, join, map, find, reject, split, isFunction} from 'virtual-lodash';
-import isNil from 'lodash/isNil';
-import {ATOMS_SCHEMAS} from './quantum/atoms-schemas'; // TODO: ATOM_SCHEMAS
-import {ALIASES} from './quantum/aliases';
-import {AtomGroupName} from './quantum/variables';
-import {iterateAtomSchemas} from './quantum/utils';
-import identity from 'lodash/identity';
+import type {Atom, AtomDictionary, AtomGroup, ClassName, CssProperty, NativeStyleSheet} from './quantum/types';
+import type {ReactElement} from 'react-native/flow/react';
 
-const S_DELIMITER = /\s+/;
 
-const appStyles = createAppStyles(ATOMS_SCHEMAS);
-const classNameAtomDictionary = createClassNameAtomDictionary(ATOMS_SCHEMAS);
-const appStyleSheet = createAppStyleSheet(appStyles);
 
-export function parseClassNames(...args) {
-  return quantumToJss(args::filter(identity));
-}
+function filterAtomsByProperty(atoms: Atom[], property: CssProperty): Atom[] {}
 
-export function lookupAtomPropertyValue(propertyName) {
-  const atom = this::map(getAtomSchemaByClassName)::find({propertyName});
-  return atom ? atom.propertyValue : null;
-}
+function filterHeritableAtoms(atoms: Atom[]): Atom[] {}
 
-function classNameToArray() {
-  return this::isString() ? this::split(S_DELIMITER) : this;
-}
-
-function classNameToString() {
-  return this::isArray() ? this : this::join(' ');
-}
-
-function quantumToJss(
-  classNames: string | number| Array | Object,
-  styles: Object = appStyleSheet,
-  aliases: Object = ALIASES
-) {
-  if (classNames::isString()) {
-    return parseStylesString(classNames, styles, aliases);
-  }
-  if (classNames::isArray()) {
-    return classNames::map(className => quantumToJss(className, styles));
-  }
-  return classNames;
-}
-
-function parseStylesString(
-  classNames: string,
-  styles: Object,
-  aliases: Object = {}
-) {
-  Object.keys(aliases).forEach(alias => classNames = classNames.replace(alias, aliases[alias]));
-
-  return classNames::classNameToArray()::map(className => {
-    const atomValue = getAtomValueByClassName(className);
-    const {propertyName} = getAtomSchemaByClassName(className);
-    if (atomValue::isFunction()) {
-      console.info(atomValue(classNames::classNameToArray()));
-    }
-    return atomValue::isFunction() ? {[propertyName]: atomValue(classNames::classNameToArray())} : styles[className];
-  })::filter(identity);
-}
-
-function createAppStyles(atomsSchemas) {
-  const appStyles = {};
-  iterateAtomSchemas(atomsSchemas, ({propertyName, propertyAbbreviation}, {value, alias}) => {
-    appStyles[`${propertyAbbreviation}${alias}`] = {[propertyName]: value};
-  });
-  return appStyles;
-}
-
-function createClassNameAtomDictionary(atomsSchemas) {
-  const classNameAtomDictionary = {};
-  iterateAtomSchemas(atomsSchemas, (atomSchema, {value, alias}) => {
-    classNameAtomDictionary[`${atomSchema.propertyAbbreviation}${alias}`] = {...atomSchema, propertyValue: value};
-  });
-  return classNameAtomDictionary;
-}
-
-function createAppStyleSheet(atoms) {
-  let nativeStyles = {};
-  let functionStyles = {};
-  for (const atom in atoms) {
-    if (getAtomValueByClassName(atom)::isFunction()) {
-      functionStyles[atom] = atoms[atom];
-    } else {
-      nativeStyles[atom] = atoms[atom];
-    }
-  }
-  return {
-    ...StyleSheet.create(nativeStyles),
-    ...functionStyles
-  };
-}
-
-export function getAtomSchemaByClassName(className) {
-  return classNameAtomDictionary[className];
-}
-
-export function getAtomValueByClassName(className) {
-  return getAtomSchemaByClassName(className).propertyValue;
-}
-
-export function concatClassNames(...classNames) {
-  return classNames::reject(isNil)::classNameToString();
-}
-
-export function filterClassNamesBy(callback: Function) {
-  return this::classNameToArray()::filter(className => callback(getAtomSchemaByClassName(className)))::classNameToString();
-}
-
-export function filterHeritableClasses() {
-  return this::filterClassNamesBy(atom => atom.heritable);
-}
-
-export function filterClassNamesByAtomGroups(atomGroups: []) {
-  return this::filterClassNamesBy(({propertyGroup} = {}) => {
-    for (const atomGroup of atomGroups) {
-      if (!propertyGroup::includes(atomGroup)) {
+function filterAtomsByGroups(atoms: Atom[], groups: AtomGroup[]): Atom[] {
+  return atoms::filter(atom => {
+    for (const group of groups) {
+      if (!atom.groups::includes(group)) {
         return false;
+        break;
       }
     }
     return true;
   });
 }
 
-export function filterClassNamesByTextGroup() {
-  return this::filterClassNamesByAtomGroups([AtomGroupName.TEXT]);
+function createClassName(atoms: Atom[]): ClassName {
+  let className = '';
+  for (const atom of atoms) {
+    className += atom.name;
+  }
+  return className;
 }
 
-export function filterClassNamesByInputGroup() {
-  return this::filterClassNamesByAtomGroups([AtomGroupName.INPUT]);
+function createStyleSheet(atomDictionary: AtomDictionary): NativeStyleSheet {
+  const scalarStyles = {};
+  for (const name in atomDictionary) {
+    const atom = atomDictionary[name];
+    if (atom.scalar) {
+      scalarStyles[name] = {[atom.property]: atom.getValue()};
+    }
+  }
+  return StyleSheet.create(scalarStyles);
 }
 
-export function filterClassNamesByViewGroup() {
-  return this::filterClassNamesByAtomGroups([AtomGroupName.VIEW]);
+const CLASS_NAME_DELIMITER=/\s+/;
+
+function parseClassName(className: ClassName, atomDictionary: AtomDictionary): Atom[] {
+  const atoms = className.split(CLASS_NAME_DELIMITER);
+  for (let i = 0; i < atoms.length; ++i) {
+    if (atoms[i] in atomDictionary) {
+      atoms[i] = atomDictionary[atoms[i]];
+    } else {
+      throw new Error(`Unknown class name ${atoms[i]}`);
+    }
+  }
+  return atoms;
 }
 
-export function filterClassNamesByExternalLayoutViewGroups() {
-  return this::filterClassNamesByAtomGroups([AtomGroupName.VIEW, AtomGroupName.EXTERNAL_LAYOUT]);
+function concatAtoms(inheritedAtoms: Atom[], atoms: Atom[]) {
+  return atoms.unshift(...inheritedAtoms);
 }
 
-export function filterClassNamesByInternalLayoutViewGroups() {
-  return this::filterClassNamesBy(({propertyGroup} = {}) => {
-    return propertyGroup::includes(AtomGroupName.VIEW) && !propertyGroup::includes(AtomGroupName.EXTERNAL_LAYOUT);
-  });
+function createStyle(
+  atoms: Atom[],
+  styleSheet: NativeStyleSheet,
+  element: ReactElement
+) {
+  const style = [];
+  for (const atom of atoms) {
+    if (atom.name in styleSheet) {
+      // Scalar atoms are cached in StyleSheet.
+      style.push(styleSheet[atom.name]);
+    } else {
+      // Compute atom value on the fly.
+      style.push({[atom.property]: atom.getValue(atoms, element)});
+    }
+  }
+  return style;
 }
+
+// TODO Ensure that array reuse works faster than allocating new array
+// function parseClassName(className: ClassName, atomDictionary: AtomDictionary): Atom[] {
+// 	const atoms = [];
+// 	for (const name of className.split(CLASS_NAME_DELIMITER)) {
+// 		if (name in atomDictionary) {
+// 			atoms.push(atomDictionary[name]);
+// 		} else {
+// 		  throw new Error(`Unknown class name ${name}`);
+// 		}
+// 	}
+// 	return atoms;
+// }

@@ -1,85 +1,115 @@
+import type {Atom, ClassName} from '../../quantum/types';
 import React from 'react';
 import {Animated, Text, TouchableOpacity, View} from 'react-native';
-import {string} from 'prop-types';
-import {isFunction, isString} from 'virtual-lodash';
+import {array, object, string} from 'prop-types';
+import {isFunction, filter, isArray, isString} from 'virtual-lodash';
 import {
-  concatClassNames,
-  filterClassNamesByExternalLayoutViewGroups,
-  filterClassNamesByInternalLayoutViewGroups,
-  filterClassNamesByTextGroup,
-  filterClassNamesByViewGroup,
-  filterHeritableClasses,
-  parseClassNames
-} from '../../stylesUtils';
+  createStyle, filterAtomsByGroups, filterAtomsByViewGroup, filterHeritableAtoms,
+  parseClassName
+} from '../../MobileQuantumContext';
+import {AtomGroupName} from '../../quantum/variables';
 
-const DEFAULT_ACTIVE_OPACITY = 0.8;
-
-function DivChildren() {
-
-}
-
-function wrapChild(child, key = null, {className}) {
+function wrapTextNodes(child, key = null) {
   if (!child) {
     return child;
   }
-  // Text
+
   if (child::isString()) {
-    child = <Text key={key} style={parseClassNames(className::filterClassNamesByTextGroup())}>{child}</Text>;
-  }
-
-
-
-  if (child.props.onPress::isFunction()) {
-    console.info('className', className);
-    console.info('external', className::filterClassNamesByExternalLayoutViewGroups());
-    console.info('internal', className::filterClassNamesByInternalLayoutViewGroups());
-    /*child = (
-      <TouchableOpacity onPress={child.onPress}
-                        activeOpacity={child.props.activeOpacity || DEFAULT_ACTIVE_OPACITY}
-                        style={parseClassNames(className::filterClassNamesByExternalLayoutViewGroups())}>
-        <Div {...child.props} className={['fx1', className::filterClassNamesByExternalLayoutViewGroups()]}/>
-      </TouchableOpacity>
-    );*/
+    return <TextWrapper key={key}>{child}</TextWrapper>
   }
 
   return child;
 }
 
+function filterClassNames(className: ClassName | Array<ClassName>) {
+  return className::isString() || className::isArray();
+}
+
+function filterAtoms(atomGroup: Atom[]) {
+  return atomGroup::isArray();
+}
+
+function parseClassNames(...classNames: Array<ClassName | ClassName[]>) : Atom[] {
+  classNames = classNames::filter(filterClassNames);
+  let atoms = [];
+  for (const className of classNames) {
+    if (className::isString()) {
+      atoms.push(...parseClassName(className, this.context.atomDictionary));
+    } else if (className::isArray()) {
+      for (const klassName of className) {
+        atoms.push(...this::parseClassNames(klassName));
+      }
+    }
+  }
+  return atoms;
+}
+
+function createStyles(...atomsGroups: Array<Atom[]>) {
+  atomsGroups = atomsGroups::filter(filterAtoms);
+  let style = [];
+  for (const atomGroup of atomsGroups) {
+    style = [...style, ...createStyle(atomGroup, this.context.styleSheet)];
+  }
+  return style;
+}
+
+class TextWrapper extends React.Component{
+
+  static contextTypes = {
+    inheritedAtoms: array,
+    styleSheet: object,
+    atomDictionary: object
+  };
+
+  render() {
+    return <Text {...this.props} style={this::createStyles(filterAtomsByGroups(this.context.inheritedAtoms, [AtomGroupName.TEXT]))}/>
+  }
+}
+
 class AbstractDiv extends React.Component {
 
   static contextTypes = {
-    className: string
+    inheritedAtoms: array,
+    atomDictionary: object.isRequired,
+    styleSheet: object.isRequired
   };
 
   static childContextTypes = {
-    className: string
+    inheritedAtoms: array
   };
 
   getChildContext() {
     return {
-      className: concatClassNames(this.context.className, this.props.className)::filterHeritableClasses()
-    }
+      inheritedAtoms: filterHeritableAtoms(this.getViewAtoms())
+    };
+  }
+
+  getViewAtoms() {
+    const {inheritedAtoms = []} = this.context;
+    const {className} = this.props;
+    return [...inheritedAtoms, ...this::parseClassNames(className)];
   }
 
   render() {
-    const {View, children, className, onPress, ...props} = this.props;
-    const processedChildren = Array.isArray(children) ? children.map(wrapChild) :  wrapChild(children);
+    const {View, children, onPress, ...props} = this.props;
+    const processedChildren = Array.isArray(children) ? children.map(wrapTextNodes) : wrapTextNodes(children);
 
-    return do {
-      if (onPress::isFunction()) {
-        <TouchableOpacity style={parseExternal}
-                          onPress={onPress}>
-          <View style={parseNotExternal}
-                children={processedChildren}
-                {...props}/>
-        </TouchableOpacity>
-      } else {
-        <View style={parseClassNames(concatClassNames(this.context.className, className)::filterClassNamesByViewGroup())}
-              children={processedChildren}
-              {...props}/>
-      }
-    };
+    const viewAtoms = filterAtomsByViewGroup(this.getViewAtoms());
 
+    if (onPress::isFunction()) {
+      return (
+        <TouchableOpacity {...props}
+                          style={[this::createStyles(viewAtoms), this.props.style]}
+                          onPress={onPress}
+                          children={processedChildren}/>
+      );
+    }
+
+    return (
+      <View {...props}
+            style={[this::createStyles(viewAtoms), this.props.style]}
+            children={processedChildren}/>
+    );
   }
 }
 
