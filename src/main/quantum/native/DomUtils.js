@@ -1,10 +1,14 @@
 import React from 'react';
 import {Span} from './Span';
 
-export function wrapTextNodes(child, key = null) {
-  if (React.isValidElement(child)) {
-    return child;
+export function wrapTextNodes(children, key = null) {
+  if (Array.isArray(children)) {
+    return children.map(wrapTextNodes);
   }
 
-  return <Span key={key}>{child}</Span>;
+  if (React.isValidElement(children)) {
+    return children;
+  }
+
+  return <Span key={key}>{children}</Span>;
 }

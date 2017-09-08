@@ -81,7 +81,11 @@ const WIDTHS = [
   ['50%', '50p'],
   ['25%', '25p'],
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 100, 125, 150, 180, 190, 260].map(mapAtomValue);
-const HEIGHTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 100, 125, 150, 180, 190, 260].map(mapAtomValue);
+const HEIGHTS = [
+  ['100%', '100p'],
+  ['50%', '50p'],
+  ['25%', '25p'],
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 100, 125, 150, 180, 190, 260].map(mapAtomValue);
 const POSITION_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 60].map(mapAtomValue);
 const BORDER_WIDTHS = [1, 2].map(mapAtomValue);
 const BORDER_STYLES = [
@@ -212,10 +216,10 @@ export const AtomSchemas = [
   createAtomSchema('flex', 'fx', FLEX_GROW_VALUES, {groups: [AtomGroups.BOX_MODEL, AtomGroups.BORDER_BOX]}),
   createAtomSchema('flexGrow', 'fxg', FLEX_GROW_VALUES, {groups: [AtomGroups.BOX_MODEL, AtomGroups.BORDER_BOX]}),
   createAtomSchema('flexShrink', 'fxs', FLEX_SHRINK_VALUES, {groups: [AtomGroups.BOX_MODEL, AtomGroups.BORDER_BOX]}),
-  createAtomSchema('flexDirection', 'fxd', FLEX_DIRECTIONS, {groups: [AtomGroups.BOX_MODEL, AtomGroups.BORDER_BOX]}),
-  createAtomSchema('flexWrap', 'fxw', FLEX_WRAPS, {groups: [AtomGroups.BOX_MODEL, AtomGroups.BORDER_BOX]}),
+  createAtomSchema('flexDirection', 'fxd', FLEX_DIRECTIONS, {groups: [AtomGroups.BOX_MODEL]}),
+  createAtomSchema('flexWrap', 'fxw', FLEX_WRAPS, {groups: [AtomGroups.BOX_MODEL]}),
   createAtomSchema('height', 'h', HEIGHTS, {groups: [AtomGroups.BOX_MODEL, AtomGroups.BORDER_BOX]}),
-  createAtomSchema('justifyContent', 'jc', FLEX_MAIN_AXIS_ALIGNS, {groups: [AtomGroups.BOX_MODEL, AtomGroups.BORDER_BOX]}),
+  createAtomSchema('justifyContent', 'jc', FLEX_MAIN_AXIS_ALIGNS, {groups: [AtomGroups.BOX_MODEL]}),
   createAtomSchema('left', 'l', POSITION_VALUES, {groups: [AtomGroups.BOX_MODEL, AtomGroups.BORDER_BOX]}),
   createAtomSchema('margin', 'm', MARGINS, {groups: [AtomGroups.BOX_MODEL, AtomGroups.BORDER_BOX]}),
   createAtomSchema('marginBottom', 'mb', MARGINS, {groups: [AtomGroups.BOX_MODEL, AtomGroups.BORDER_BOX]}),
