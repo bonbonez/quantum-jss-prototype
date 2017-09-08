@@ -5,15 +5,31 @@ import {Div} from './quantum/native/Div';
 import classNames from 'classnames';
 
 export default class App extends React.Component {
+
+  state = {
+    fontSizeClassName: 'fz-m'
+  };
+
+  componentDidMount() {
+    /*setInterval(() => {
+      const time = Date.now();
+      this.setState({
+        fontSizeClassName: Math.random() > 0.5 ? 'fz-m' : 'fz-xl'
+      }, () => {
+        console.info('time2', Date.now() - time);
+      });
+    }, 500);*/
+  }
+
   render() {
     return (
       <MobileQuantumContext>
-        <Div className={classNames('fx1 fz-xl c-w lh-t bgc-r')}>
+        <Div className={classNames('fx1 c-w lh-t bgc-r', this.state.fontSizeClassName)}>
           hey there
           <Div className="btn btn--fb" onPress={() => console.info('connecting to facebook')}>Connect Facebook</Div>
 
           qux
-          <Div className={classNames('w50p fz-m c-w bgc-b')}
+          <Div className={classNames('w50p c-w bgc-b')}
                onPress={() => console.log('foo')}>
             foo
             <Div className="w100 h50 c-bb bgc-g7">yo</Div>

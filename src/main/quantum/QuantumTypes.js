@@ -23,8 +23,7 @@ export type AtomValueGetter = (atoms: Atom[], element: ReactElement) => AtomValu
 export type AtomValueSchema = [AtomValueScalar | AtomValueGetter, string]; // Tuple of value (or value getter) and alias.
 
 export type AtomSchemaOptions = {
-  groups: [],
-  heritable: boolean
+  groups: []
 };
 
 export type AtomSchema = {
@@ -32,7 +31,6 @@ export type AtomSchema = {
   abbrev: string, // CSS property abbreviation.
   values: AtomValueSchema[] // List of atom values.
   groups: AtomGroup[], // List of groups this atom should belong to.
-  heritable: boolean
 }
 
 export type AtomName = string;
@@ -43,7 +41,6 @@ export type Atom = {
   property: CssProperty, // CSS property name.
   getValue: AtomValueGetter, // Getter that returns value for this atom.
   groups: AtomGroup[],
-  heritable: boolean // can be passed down or not
 };
 
 export type AtomDictionary = {[name: string]: Atom};

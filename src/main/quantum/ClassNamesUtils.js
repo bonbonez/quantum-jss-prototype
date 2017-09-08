@@ -1,10 +1,19 @@
 import type {Atom, AtomDictionary, ClassName, ClassNameAliasesSchema} from './QuantumTypes';
+import isEmpty from 'virtual-lodash/isEmpty';
+import isObjectLike from 'virtual-lodash/isObjectLike';
+import isString from 'virtual-lodash/isString';
+import trim from 'virtual-lodash/trim';
 
 export const CLASS_NAME_DELIMITER=/\s+/;
 
-export function resolveAliases(className: ClassName, aliases: ClassNameAliasesSchema) {
-  const classNames = className.split(CLASS_NAME_DELIMITER);
-  for (let i = 0; i < classNames.length; ++i) {
+export function splitClassNames(className: ClassName): ClassName[] {
+  if (className::isString() && className::trim()) {
+    return className.split(CLASS_NAME_DELIMITER);
+  }
+}
+
+export function resolveAliases(classNames: ClassName[], aliases: ClassNameAliasesSchema = []) {
+  for (let i = classNames.length; i >= 0; --i) {
     if (classNames[i] in aliases) {
       classNames.splice(i, 1, ...aliases[classNames[i]]);
     }

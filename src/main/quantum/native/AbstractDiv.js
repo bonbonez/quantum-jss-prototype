@@ -3,8 +3,8 @@ import {TouchableOpacity, View} from 'react-native';
 import {array, object} from 'prop-types';
 import {isFunction, without} from 'virtual-lodash';
 import {createStyle} from './createStyle';
-import {parseClassName, resolveAliases} from '../ClassNamesUtils';
-import {filterAtomsByGroups, filterHeritableAtoms, isEqualAtoms} from '../AtomUtils';
+import {parseClassName, resolveAliases, splitClassNames} from '../ClassNamesUtils';
+import {filterAtomsByGroups, isEqualAtoms} from '../AtomUtils';
 import {AtomGroups} from '../AtomGroups';
 import {wrapTextNodes} from './DomUtils';
 
@@ -45,15 +45,14 @@ export class AbstractDiv extends React.Component {
 
   cacheStyles({className = '', onPress}, inheritedAtoms = []) {
     const {quantum} = this.context;
-    const atoms = parseClassName(resolveAliases(className, quantum.classNamesAliases), quantum.atomDictionary);
+    const atoms = parseClassName(resolveAliases(splitClassNames(className), quantum.classNamesAliases), quantum.atomDictionary);
     if (inheritedAtoms) {
       atoms.unshift(...inheritedAtoms);
     }
 
-
     this.atoms = atoms;
     this.viewAtoms = filterAtomsByGroups(this.atoms, [AtomGroups.BOX_MODEL]);
-    this.heritableAtoms = filterHeritableAtoms(this.atoms);
+    this.heritableAtoms = filterAtomsByGroups(this.atoms, [AtomGroups.HERITABLE]);
     this.viewStyles = createStyle(this.viewAtoms, quantum.styleSheet, this);
 
     if (this.props.onPress::isFunction()) {

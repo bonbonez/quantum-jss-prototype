@@ -10,26 +10,31 @@ import type {
 import filter from 'virtual-lodash/filter';
 import includes from 'virtual-lodash/includes';
 import isFunction from 'virtual-lodash/isFunction';
-
-export function createAtomSchemaList(atomsSchemas: AtomSchema[]) {
-  const atomSchemaList = [];
-  for (const atomSchema of atomsSchemas) {
-    atomSchemaList.push(createAtomSchema(...atomSchema));
-  }
-  return atomSchemaList;
-}
+import isArray from 'virtual-lodash/isArray';
 
 export function isEqualAtoms(atomsA: Atom[], atomsB: Atom[]): boolean {
-  if (atomsA.length === atomsB.length) {
-    aLabel: for (const aProp of atomsA) {
-      for (const bProp of atomsB) {
-        if (aProp.name === bProp.name) {
-          continue aLabel;
-        }
-      }
-      return false;
-    }
+  if (!atomsA::isArray() || !atomsB::isArray()) {
+    return null;
   }
+
+  atomsACheck: for (let i = 0; i < atomsA.length; ++i) {
+    for (let j = 0; j < atomsB.length; ++j) {
+      if (atomsA[i].name === atomsB[j].name) {
+        continue atomsACheck;
+      }
+    }
+    return false;
+  }
+
+  atomsBCheck: for (let i = 0; i < atomsB.length; ++i) {
+    for (let j = 0; j < atomsA.length; ++j) {
+      if (atomsB[i].name === atomsA[j].name) {
+        continue atomsBCheck;
+      }
+    }
+    return false;
+  }
+
   return true;
 }
 
@@ -41,8 +46,7 @@ export function createAtomSchema(
   abbrev: string,
   values: AtomValueSchema[],
   options: AtomSchemaOptions = {
-    groups: [],
-    heritable: false
+    groups: []
   }
 ): AtomSchema {
   return {
@@ -69,20 +73,12 @@ export function filterAtomsByGroups(atoms: Atom[], groups: AtomGroup[]): Atom[] 
 }
 
 /*
-* Filters atoms that have heritable option set to true
-* */
-export function filterHeritableAtoms(atoms: Atom[]): Atom[] {
-  const filterAtoms = atom => atom.heritable;
-  return atoms::filter(filterAtoms);
-}
-
-/*
 * creates object of AtomDictionary type
 * */
 export function createAtomDictionary(schemas: AtomSchema[]): AtomDictionary {
   const atomDictionary = {};
   for (const schema of schemas) {
-    const {property, abbrev, values, groups, heritable} = schema;
+    const {property, abbrev, values, groups} = schema;
     for (const {value, alias} of values) {
       const name = `${abbrev}${alias}`;
       const scalar = !value::isFunction();
@@ -91,7 +87,6 @@ export function createAtomDictionary(schemas: AtomSchema[]): AtomDictionary {
         property,
         scalar,
         groups,
-        heritable,
         getValue: scalar ? () => value : value
       };
       atomDictionary[name] = atom;

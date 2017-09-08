@@ -1,9 +1,10 @@
 import React from 'react';
 import {Text} from 'react-native';
 import {array, object} from 'prop-types';
-import {filterHeritableAtoms, isEqualAtoms} from '../AtomUtils';
+import {filterAtomsByGroups, isEqualAtoms} from '../AtomUtils';
 import {createStyle} from './createStyle';
-import {parseClassName, resolveAliases} from '../ClassNamesUtils';
+import {parseClassName, resolveAliases, splitClassNames} from '../ClassNamesUtils';
+import {AtomGroups as AtomGroup} from '../AtomGroups';
 
 export class Span extends React.Component{
 
@@ -41,7 +42,7 @@ export class Span extends React.Component{
     let atoms;
 
     if (className) {
-      atoms = parseClassName(resolveAliases(className, quantum.classNamesAliases), quantum.atomDictionary);
+      atoms = parseClassName(resolveAliases(splitClassNames(className), quantum.classNamesAliases), quantum.atomDictionary);
     }
 
     if (inheritedAtoms) {
@@ -51,9 +52,9 @@ export class Span extends React.Component{
         atoms = inheritedAtoms;
       }
     }
-    console.info('atoms', atoms);
+
     this.atoms = atoms;
-    this.heritableAtoms = filterHeritableAtoms(this.atoms);
+    this.heritableAtoms = filterAtomsByGroups(this.atoms, [AtomGroup.HERITABLE]);
     this.styles = createStyle(this.atoms, quantum.styleSheet, this);
   }
 
