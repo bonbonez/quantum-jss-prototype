@@ -29,10 +29,21 @@ export default class App extends React.Component {
           <Div className="btn btn--fb" onPress={() => console.info('connecting to facebook')}>Connect Facebook</Div>
 
           qux
-          <Div className={classNames('w50p c-w bgc-b')}
-               onPress={() => console.log('foo')}>
+          <Div className={classNames('w50p c-w bgc-b')}>
             foo
-            <Div className="w100 h50 c-bb bgc-g7">yo</Div>
+            <Div className="w100 h50 c-bb bgc-g7 ov-s">
+              <Div className="c-r">123123123</Div>
+              <Div className="c-r">123123123</Div>
+              <Div className="c-r">123123123</Div>
+              <Div className="c-r">123123123</Div>
+              <Div className="c-r">123123123</Div>
+              <Div className="c-r">123123123</Div>
+              <Div className="c-r">123123123</Div>
+              <Div className="c-r">123123123</Div>
+              <Div className="c-r">123123123</Div>
+              <Div className="c-r">123123123</Div>
+              <Div className="c-r">123123123</Div>
+            </Div>
 
             <Div className="w100 h100 bgc-g3 c-b"
                  onPress={() => console.info('baz')}>baz</Div>

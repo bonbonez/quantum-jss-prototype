@@ -1,13 +1,28 @@
 import React from 'react';
-import {View} from 'react-native';
+import {ScrollView, TouchableOpacity, View} from 'react-native';
 import {AtomGroups} from '../../AtomGroups';
 import {createStyle} from './../createStyle';
 import {filterAtomsByGroups} from '../../AtomUtils';
+import without from 'virtual-lodash/without';
+import find from 'virtual-lodash/find';
 import {wrapTextNodes} from './../DomUtils';
 
-export function viewPlugableRenderer(host) {
+export function scrollViewPlugableRenderer(host) {
   const {props, context, atoms} = host;
-  const styles = createStyle(filterAtomsByGroups(atoms, [AtomGroups.BOX_MODEL]), context.quantum.styleSheet, host);
+
+  const overflowScrollAtom = atoms::find({name: 'ov-s'});
+  if (!overflowScrollAtom) {
+    return null;
+  }
+
+  const newAtoms = atoms::without(overflowScrollAtom);
+  const boxModelAtoms = filterAtomsByGroups(newAtoms, [AtomGroups.BOX_MODEL]);
+  const scrollViewAtoms = filterAtomsByGroups(boxModelAtoms, [AtomGroups.BORDER_BOX]);
+  const scrollViewContentContainerAtoms = boxModelAtoms::without(...scrollViewAtoms);
+
   const {children, ...rest} = props;
-  return <View {...rest} style={styles} children={wrapTextNodes(children)}/>
+  return <ScrollView {...rest}
+                     style={createStyle(scrollViewAtoms, context.quantum.styleSheet, host)}
+                     contentContainerStyle={createStyle(scrollViewContentContainerAtoms, context.quantum.styleSheet, host)}
+                     children={wrapTextNodes(children)}/>
 }

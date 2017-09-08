@@ -40,24 +40,18 @@ export class AbstractQuantumNode extends React.Component {
 
   cacheStyles(className, inheritedAtoms) {
     const {quantum} = this.context;
-    let atoms;
+    let atoms = []; // need to make a default value so all plugableRenderers could have a non-null object
 
     if (className) {
       atoms = parseClassName(resolveAliases(splitClassNames(className), quantum.classNamesAliases), quantum.atomDictionary);
     }
 
     if (inheritedAtoms) {
-      if (atoms) {
-        atoms.unshift(...inheritedAtoms);
-      } else {
-        atoms = inheritedAtoms;
-      }
+      atoms.unshift(...inheritedAtoms);
     }
 
-    if (atoms) {
-      this.atoms = atoms;
-      this.heritableAtoms = filterAtomsByGroups(this.atoms, [AtomGroups.HERITABLE]);
-    }
+    this.atoms = atoms;
+    this.heritableAtoms = filterAtomsByGroups(this.atoms, [AtomGroups.HERITABLE]);
   }
 
   render() {

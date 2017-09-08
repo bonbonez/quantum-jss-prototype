@@ -99,6 +99,7 @@ const RADII = [
   0, 5].map(mapAtomValue);
 const OPACITIES = range(0, 101).map(mapAtomValue);
 const OVERFLOWS = [
+  ['scroll', 's'],
   ['visible', 'v'],
   ['hidden', 'h']
 ].map(mapAtomValue);
