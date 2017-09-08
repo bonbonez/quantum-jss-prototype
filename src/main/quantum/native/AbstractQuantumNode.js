@@ -54,8 +54,10 @@ export class AbstractQuantumNode extends React.Component {
       }
     }
 
-    this.atoms = atoms;
-    this.heritableAtoms = filterAtomsByGroups(this.atoms, [AtomGroups.HERITABLE]);
+    if (atoms) {
+      this.atoms = atoms;
+      this.heritableAtoms = filterAtomsByGroups(this.atoms, [AtomGroups.HERITABLE]);
+    }
   }
 
   render() {
