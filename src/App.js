@@ -1,15 +1,14 @@
 import React  from 'react';
 import {AppRegistry} from 'react-native';
 import {MobileQuantumContext} from './MobileQuantumContext';
-import {Div} from './quantum/react-native/components/Div';
+import {Div} from './quantum/native/Div';
 import classNames from 'classnames';
 
 export default class App extends React.Component {
   render() {
     return (
       <MobileQuantumContext>
-        <Div className={classNames('fx1 fz-xl c-w lh-t bgc-r', {'fz-s': Math.random() > 0.5})}
-             onPress={() => console.log('okay')}>
+        <Div className={classNames('fx1 fz-xl c-w lh-t bgc-r')}>
           hey there
           <Div className="btn btn--fb" onPress={() => console.info('connecting to facebook')}>Connect Facebook</Div>
 

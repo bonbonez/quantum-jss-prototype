@@ -1,4 +1,4 @@
-import type {AtomDictionary, NativeStyleSheet} from '../types';
+import type {AtomDictionary, NativeStyleSheet} from '../QuantumTypes';
 import {StyleSheet} from 'react-native';
 
 export function createStyleSheet(atomDictionary: AtomDictionary): NativeStyleSheet {

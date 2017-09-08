@@ -12,7 +12,7 @@ export type AtomGroup = {
 
 export type ClassNameAlias = AtomName[];
 
-export type ClassNameAliases = {
+export type ClassNameAliasesSchema = {
   [name: string]: ClassNameAlias
 }
 
@@ -20,9 +20,7 @@ export type AtomValueScalar = number | string;
 
 export type AtomValueGetter = (atoms: Atom[], element: ReactElement) => AtomValueScalar | Object; // Object type denotes animation.
 
-export type AtomValueSchema =
-  AtomValueScalar | // Self-aliased scalar.
-  [AtomValueScalar | AtomValueGetter, string]; // Tuple of value (or value getter) and alias.
+export type AtomValueSchema = [AtomValueScalar | AtomValueGetter, string]; // Tuple of value (or value getter) and alias.
 
 export type AtomSchemaOptions = {
   groups: [],
@@ -40,7 +38,7 @@ export type AtomSchema = {
 export type AtomName = string;
 
 export type Atom = {
-  name: string, // Ex. fx-z
+  name: AtomName, // Ex. fx-z
   scalar: boolean,
   property: CssProperty, // CSS property name.
   getValue: AtomValueGetter, // Getter that returns value for this atom.

@@ -6,22 +6,39 @@ import type {
   AtomSchemaOptions,
   AtomValueSchema,
   CssProperty
-} from './types';
+} from './QuantumTypes';
 import filter from 'virtual-lodash/filter';
 import includes from 'virtual-lodash/includes';
 import isFunction from 'virtual-lodash/isFunction';
 
-/*
-* used to separate value abbreviation and property abbreviation
-* */
-const DASH_SEPARATOR = '-';
+export function createAtomSchemaList(atomsSchemas: AtomSchema[]) {
+  const atomSchemaList = [];
+  for (const atomSchema of atomsSchemas) {
+    atomSchemaList.push(createAtomSchema(...atomSchema));
+  }
+  return atomSchemaList;
+}
+
+export function isEqualAtoms(atomsA: Atom[], atomsB: Atom[]): boolean {
+  if (atomsA.length === atomsB.length) {
+    aLabel: for (const aProp of atomsA) {
+      for (const bProp of atomsB) {
+        if (aProp.name === bProp.name) {
+          continue aLabel;
+        }
+      }
+      return false;
+    }
+  }
+  return true;
+}
 
 /*
 * creates object that contains all information about Atom
 * */
 export function createAtomSchema(
   property: CssProperty,
-  abbrev: string = "123",
+  abbrev: string,
   values: AtomValueSchema[],
   options: AtomSchemaOptions = {
     groups: [],
@@ -31,26 +48,11 @@ export function createAtomSchema(
   return {
     property,
     abbrev,
-    values: values.map(mapAtomValue), // List of atom values.
+    values,
     ...options
   };
 }
 
-/*
-* used to process values property of AtomSchema
-* */
-export function mapAtomValue(value) {
-  value = Array.isArray(value) ? value : [value, value];
-  const [atomValue, atomAlias] = value;
-  const separator = !isNaN(parseInt(atomAlias, 10)) ? '' : DASH_SEPARATOR;
-  return {
-    value: atomValue,
-    alias: `${separator}${atomAlias}`
-  };
-}
-
-// todo: make groups heritable
-// todo: closures
 /*
 * Filters atoms by given array of AtomGroup (e.g. TEXT, LAYOUT, etc.)
 * */

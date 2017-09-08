@@ -1,15 +1,15 @@
 import type {ReactElement} from 'react-native/flow/react';
 import React from 'react';
-import {createStyleSheet} from './quantum/react-native/createStyleSheet';
-import {createAliases} from './quantum/aliases';
-import {createAtomDictionary} from './quantum/atoms';
-import {ATOMS_SCHEMAS} from './styles/atoms-schemas';
-import {ALIASES_SCHEMA} from './styles/aliases-schema';
-import {QuantumContext} from './quantum/react/QuantumContext';
+import {createStyleSheet} from './quantum/native/createStyleSheet';
+import {createAliases} from './quantum/AliasUtils';
+import {createAtomDictionary, createAtomSchemaList} from './quantum/AtomUtils';
+import {AtomSchemas} from './grabr-css/AtomSchemas';
+import {AliasesSchema} from './grabr-css/AliasesSchema';
+import {QuantumContext} from './quantum/native/QuantumContext';
 
-const atomDictionary = createAtomDictionary(ATOMS_SCHEMAS);
+const atomDictionary = createAtomDictionary(createAtomSchemaList(AtomSchemas));
 const styleSheet = createStyleSheet(atomDictionary);
-const classNamesAliases = createAliases(ALIASES_SCHEMA);
+const classNamesAliases = createAliases(AliasesSchema);
 
 export function MobileQuantumContext({children}) {
   return (

@@ -1,4 +1,4 @@
-export const ALIASES_SCHEMA = {
+export const AliasesSchema = {
   'btn': 'h50 fxd-r jc-c ai-c w100p bdr5 fz-m',
   'btn--w': 'bgc-w c-b',
   'btn--fb': 'bgc-fb c-w',

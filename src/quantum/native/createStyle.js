@@ -1,5 +1,5 @@
 //@flow
-import type {Atom, NativeStyleSheet} from '../types';
+import type {Atom, NativeStyleSheet} from '../QuantumTypes';
 import type {ReactElement} from 'react-native/flow/react';
 
 export function createStyle(
