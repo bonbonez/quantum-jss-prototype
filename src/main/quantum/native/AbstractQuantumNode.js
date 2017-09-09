@@ -1,8 +1,10 @@
 import React from 'react';
 import {array, object} from 'prop-types';
 import {filterAtomsByGroups, isEqualAtoms} from '../AtomUtils';
-import {parseClassName, resolveAliases, splitClassNames} from '../ClassNamesUtils';
+import {isValidClassNamesProperty, parseClassName, resolveAliases, splitClassNames} from '../ClassNamesUtils';
 import {AtomGroups} from '../AtomGroups';
+import {QuantumContext} from './QuantumContext';
+import isFunction from 'virtual-lodash/isFunction';
 
 export class AbstractQuantumNode extends React.Component {
 
@@ -42,8 +44,12 @@ export class AbstractQuantumNode extends React.Component {
     const {quantum} = this.context;
     let atoms = []; // need to make a default value so all plugableRenderers could have a non-null object
 
-    if (className) {
-      atoms = parseClassName(resolveAliases(splitClassNames(className), quantum.classNamesAliases), quantum.atomDictionary);
+    if (isValidClassNamesProperty(className)) {
+      let classNames = splitClassNames(className);
+      for (const filter of QuantumContext.classNamesFilters) {
+        classNames = filter(classNames);
+      }
+      atoms = parseClassName(classNames, quantum.atomDictionary);
     }
 
     if (inheritedAtoms) {

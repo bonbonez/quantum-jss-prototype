@@ -10,7 +10,9 @@ import {wrapTextNodes} from './../DomUtils';
 export function scrollViewPlugableRenderer(host) {
   const {props, context, atoms} = host;
 
-  const overflowScrollAtom = atoms::find({name: 'ov-s'});
+  // TODO: use overflow-x/overflow-y
+  // take names from NativeStyleProperty
+  const overflowScrollAtom = atoms::find({property: 'overflow-x'});
   if (!overflowScrollAtom) {
     return null;
   }

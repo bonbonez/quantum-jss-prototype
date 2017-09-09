@@ -10,12 +10,6 @@ export type AtomGroup = {
   name: string
 };
 
-export type ClassNameAlias = AtomName[];
-
-export type ClassNameAliasesSchema = {
-  [name: string]: ClassNameAlias
-}
-
 export type AtomValueScalar = number | string;
 
 export type AtomValueGetter = (atoms: Atom[], element: ReactElement) => AtomValueScalar | Object; // Object type denotes animation.

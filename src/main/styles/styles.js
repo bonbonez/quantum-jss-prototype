@@ -1,32 +1,33 @@
 import range from 'lodash/range';
 import findLast from 'virtual-lodash/findLast';
-import {
-  BLACK_COLOR,
-  BRAND_BLUE_COLOR,
-  FACEBOOK_COLOR,
-  FONT_SIZE_L,
-  FONT_SIZE_M,
-  FONT_SIZE_S,
-  FONT_SIZE_XL,
-  FONT_SIZE_XXL,
-  GREEN_COLOR,
-  GREY_12_COLOR,
-  GREY_3_COLOR,
-  GREY_44_COLOR,
-  GREY_65_COLOR,
-  GREY_7_COLOR,
-  RED_COLOR,
-  TRANSPARENT_COLOR,
-  TWITTER_COLOR,
-  WHITE_50_COLOR,
-  WHITE_COLOR,
-  YELLOW_COLOR
-} from './constants';
-import {createAtomSchema} from '../quantum/AtomUtils';
+import {createAtomDictionary, createAtomSchema} from '../quantum/AtomUtils';
 import {AtomGroups} from '../quantum/AtomGroups';
 import {ReactNativeAtomGroups} from '../quantum/native/ReactNativeAtomGroups';
+import {createAliases} from '../quantum/AliasUtils';
 
 const DASH_SEPARATOR = '-';
+
+export const FONT_SIZE_S = 11;
+export const FONT_SIZE_M = 16;
+export const FONT_SIZE_L = 22;
+export const FONT_SIZE_XL = 30;
+export const FONT_SIZE_XXL = 44;
+
+export const TRANSPARENT_COLOR = 'transparent';
+export const WHITE_COLOR = '#ffffff';
+export const WHITE_50_COLOR = 'rgba(255, 255, 255, 0.5)';
+export const GREY_3_COLOR= '#f8f8f8';
+export const GREY_7_COLOR= '#eeeeee';
+export const GREY_12_COLOR= '#e0e0e0';
+export const GREY_44_COLOR= '#8f8f95';
+export const GREY_65_COLOR= '#57585a';
+export const BLACK_COLOR= '#000000';
+export const BRAND_BLUE_COLOR = '#48A8c1';
+export const YELLOW_COLOR = '#feb310';
+export const RED_COLOR = '#ff806f';
+export const GREEN_COLOR = '#5ce785';
+export const FACEBOOK_COLOR = '#48649f';
+export const TWITTER_COLOR = '#50acee';
 
 function mapAtomValue(value) {
   value = Array.isArray(value) ? value : [value, value];
@@ -99,7 +100,6 @@ const RADII = [
   0, 5].map(mapAtomValue);
 const OPACITIES = range(0, 101).map(mapAtomValue);
 const OVERFLOWS = [
-  ['scroll', 's'],
   ['visible', 'v'],
   ['hidden', 'h']
 ].map(mapAtomValue);
@@ -205,7 +205,7 @@ function calculateLineHeight(atoms, element, multiplier) {
   return fontSize.getValue(atoms, element) * multiplier;
 }
 
-export const AtomSchemas = [
+export const AtomDictionary = createAtomDictionary([
   createAtomSchema('alignItems', 'ai', FLEX_CROSS_AXIS_ALIGNS, {groups: [AtomGroups.BOX_MODEL]}),
   createAtomSchema('alignSelf', 'as', FLEX_SELF_ALIGNS, {groups: [AtomGroups.BOX_MODEL]}),
   createAtomSchema('borderBottomWidth', 'bdbw', BORDER_WIDTHS, {groups: [AtomGroups.BOX_MODEL]}),
@@ -285,6 +285,17 @@ export const AtomSchemas = [
   createAtomSchema('borderTopWidth', 'bdtw', BORDER_WIDTHS, {groups: [AtomGroups.BOX_MODEL]}),
   createAtomSchema('borderWidth', 'bdw', BORDER_WIDTHS, {groups: [AtomGroups.BOX_MODEL]}),
   createAtomSchema('opacity', 'op', OPACITIES, {groups: [AtomGroups.BOX_MODEL]}),
-  createAtomSchema('overflow', 'ov', OVERFLOWS, {groups: [AtomGroups.BOX_MODEL]}),
   createAtomSchema('elevation', 'el', ELEVATIONS, {groups: [AtomGroups.BOX_MODEL]}),
-];
+  createAtomSchema('overflow', 'ov', OVERFLOWS, {groups: [AtomGroups.BOX_MODEL]}),
+
+  //createAtomSchema('overflow-x', 'ovx', [['scroll', 's']].map(mapAtomValue)),
+  //createAtomSchema('overflow-y', 'ovy', [['scroll', 's']].map(mapAtomValue))
+]);
+
+export const Aliases = createAliases({
+  'btn': 'h50 fxd-r jc-c ai-c w100p bdr5 fz-m',
+  'btn--w': 'bgc-w c-b',
+  'btn--fb': 'bgc-fb c-w',
+
+  'input': 'w100p pt15 ta-l fz-m c-b'
+});

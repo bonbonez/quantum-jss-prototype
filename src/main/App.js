@@ -1,6 +1,6 @@
 import React  from 'react';
 import {AppRegistry} from 'react-native';
-import {MobileQuantumContext} from './MobileQuantumContext';
+import {MobileQuantumContext} from './styles/MobileQuantumContext';
 import {Div} from './quantum/native/Div';
 import classNames from 'classnames';
 
@@ -31,7 +31,7 @@ export default class App extends React.Component {
           qux
           <Div className={classNames('w50p c-w bgc-b')}>
             foo
-            <Div className="w100 h50 c-bb bgc-g7 ov-s">
+            <Div className="w100 h50 c-bb bgc-g7">
               <Div className="c-r">123123123</Div>
               <Div className="c-r">123123123</Div>
               <Div className="c-r">123123123</Div>
