@@ -4,6 +4,8 @@ import {MobileQuantumContext} from './styles/MobileQuantumContext';
 import {Div} from './quantum/native/Div';
 import classNames from 'classnames';
 
+let updateTimes = [];
+
 export default class App extends React.Component {
 
   state = {
@@ -11,14 +13,19 @@ export default class App extends React.Component {
   };
 
   componentDidMount() {
-    /*setInterval(() => {
+    setInterval(() => {
       const time = Date.now();
       this.setState({
         fontSizeClassName: Math.random() > 0.5 ? 'fz-m' : 'fz-xl'
       }, () => {
-        console.info('time2', Date.now() - time);
+        const newTime = Date.now() - time;
+        updateTimes.push(newTime);
+        if (updateTimes.length >= 20) {
+          console.info('20 updates: ', updateTimes.reduce((acc, next) => (acc += next, acc), 0) / 20);
+          updateTimes = [];
+        }
       });
-    }, 500);*/
+    }, 50);
   }
 
   render() {

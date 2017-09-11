@@ -1,16 +1,16 @@
 import React from 'react';
 import {AbstractQuantumNode} from './AbstractQuantumNode';
-import {touchableOpacityPlugableRenderer} from './plugable-renderers/touchableOpacityPlugableRenderer';
-import {viewPlugableRenderer} from './plugable-renderers/viewPlugableRenderer';
-import {scrollViewPlugableRenderer} from './plugable-renderers/scrollViewPlugableRenderer';
+import {createTouchableOpacityPlugableRenderer} from './plugable-renderers-creators/createTouchableOpacityPlugableRenderer';
+import {createViewPlugableRenderer} from './plugable-renderers-creators/createViewPlugableRenderer';
+import {createScrollViewPlugableRenderer} from './plugable-renderers-creators/createScrollViewPlugableRenderer';
 
 
 export class Div extends React.Component {
 
   static plugins = [
-    scrollViewPlugableRenderer,
-    touchableOpacityPlugableRenderer,
-    viewPlugableRenderer
+    createScrollViewPlugableRenderer(),
+    createTouchableOpacityPlugableRenderer(),
+    createViewPlugableRenderer()
   ];
 
   static addPlugin(plugin) {

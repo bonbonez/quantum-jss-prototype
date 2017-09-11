@@ -1,10 +1,10 @@
 import React from 'react';
 import {AbstractQuantumNode} from './AbstractQuantumNode';
-import {textPlugableRenderer} from './plugable-renderers/textPlugableRenderer';
+import {createTextPlugableRenderer} from './plugable-renderers-creators/createTextPlugableRenderer';
 
 export class Span extends React.Component {
   static plugins = [
-    textPlugableRenderer
+    createTextPlugableRenderer()
   ];
 
   static addPlugin(plugin) {
